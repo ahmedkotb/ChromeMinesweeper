@@ -11,14 +11,30 @@
         <a href="changelog"> changelog </a><br>
         you can send your feedbacks and comments to <br> kotbcorp@gmail.com <br>
         thank u
-        
-        <div align = "center">
-        <img name = "newGameImg" src ="images/newgame.png" onclick = "startNewGame()"/>
-        <img name ="pauseGameImg" src ="images/pause1.png" onclick = "pauseResume()"/>
+
+        <div align = "center" >
+            <!--<div style = "background-Color:#c3d9ff">-->
+            <div>
+               <img src ="images/sface.png" width = "64px" height = "64px"/>        
+               <img src ="images/small.png" width = "100px" height = "64px"/>
+
+               <img src ="images/mface.png" width = "64px" height = "64px"/>
+               <img src ="images/med.png" width = "100px" height = "64px"/>
+
+               <img src ="images/lface.png" width = "64px" height = "64px"/>
+               <img src ="images/large.png" width = "100px" height = "64px"/>
+               <br>
+               <img name ="pauseGameImg" src ="images/pause1.png" onclick = "pauseResume()"/>
+               <br>
+               <div id ="timerLabel"></div>
+            </div>
+    
+            <br>
+            <!--<img name = "newGameImg" src ="images/newgame.png" onclick = "startNewGame()"/> -->
+            <div id = "board" oncontextmenu="return false" ondragstart="return false"></div>
         </div>
         
-        <div id = "board" align = "center" oncontextmenu="return false" ondragstart="return false"></div>
-        <div id ="timerLabel" align = "center"></div>
+
     </body>
     
 </html>
