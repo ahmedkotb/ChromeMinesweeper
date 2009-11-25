@@ -23,8 +23,11 @@ cellsView = new Array(rows);
 //1 is visible , 0 is not
 //2 is flaged
 function timer(){
-    var timerDiv = document.getElementById("timerLabel");  
-    timerDiv.innerHTML = "Time : " + ++time + " seconds";   
+    time++;
+    var mins = Math.floor(time/60);
+    var secs = time%60;
+    document.getElementById("timerLabel").innerHTML = "Time:  " + (mins > 9 ? mins: "0" + mins) + ":" + (secs > 9 ? secs: "0" + secs)+ "";   
+    document.getElementById("flagsLabel").innerHTML = "Flags: "+ flaged + "/" + bombsNum;
 }
 function startNewGame(){
     run = false;
@@ -36,7 +39,9 @@ function startNewGame(){
     drawBoard();
     
     //set the pause button
-    document.getElementById("timerLabel").innerHTML = "Time : 0 seconds";
+    document.getElementById("timerLabel").innerHTML = "Time:  00:00";
+    document.getElementById("flagsLabel").innerHTML = "Flags: 0/" + bombsNum;
+    
     document.pauseGameImg.src = "images/pause1.png";
     document.pauseGameImg.onmouseover = function () {this.src = "images/pause2.png";};
     document.pauseGameImg.onmouseout = function () {this.src = "images/pause1.png";};
@@ -216,7 +221,6 @@ function pauseResume(){
     //var board = document.getElementById("board");
     if (!run){
         run = true;
-        //self.setTimeout("timer()",1000);
         timerId = setInterval("timer()",1000);
         //board.style.display = "block";
         document.pauseGameImg.src = "images/pause1.png";
