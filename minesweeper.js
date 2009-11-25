@@ -159,7 +159,8 @@ function showBombs(){
                 }
             }else{
                 if (cellsData[i][j] != -1){
-                    cell.style.backgroundColor = "red";
+                    //found a wrong flag
+                    cell.style.backgroundImage = "url(images/flag2.png)";
                 }    
             }         
         }
@@ -218,7 +219,7 @@ function lostAction(){
     run = false;
     game = false;
     showBombs();
-    alert("how unlucky you are ?!!!\nbetter luck next time :D");
+    alert("how unlucky you are !!!\nbetter luck next time :D");
 }
 
 function winAction(){

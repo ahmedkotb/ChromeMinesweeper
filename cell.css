@@ -1,6 +1,7 @@
 .cell_closed {
     float:left;
     background-color:#fbcc67;
+    background-size: 100%;
     width:35px;
     height:35px;
     text-align:center;
@@ -10,6 +11,7 @@
 .cell_opened{
     float:left;
     background-color:#eceae9;
+    background-size: 100%;
     width:35px;
     height:35px;
     text-align:center;
