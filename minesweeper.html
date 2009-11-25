@@ -5,8 +5,8 @@
         <script src="minesweeper.js"></script>
     </head>
     
-    <body onload= "startNewGame()">
-    <h1> MineSweeper 0.08 Alpha</h1>
+    <body onload= "startNewGame(0)">
+    <h1> MineSweeper 0.09 Alpha</h1>
         <h3>pure javaScript mine Sweeper</h3>
         <a href="changelog"> changelog </a><br>
         you can send your feedbacks and comments to <br> kotbcorp@gmail.com <br>
@@ -15,12 +15,24 @@
         <div align = "center" >
             <!--<div style = "background-Color:#c3d9ff">-->
             <div>
-               <img src ="images/sface.png" width = "64px" height = "64px"/>        
+                <img src ="images/sface.png" 
+                    width = "64px" height = "64px"
+                    title = "small"
+                    onclick = "startNewGame(0)"
+                   />        
                <!--<img src ="images/small.png" width = "100px" height = "64px"/>-->
 
-               <img src ="images/mface.png" width = "64px" height = "64px"/>
+               <img src ="images/mface.png"
+                   width = "64px" height = "64px"
+                   title = "medium"
+                   onclick = "startNewGame(1)"
+               />
                
-               <img src ="images/lface.png" width = "64px" height = "64px"/>
+               <img src ="images/lface.png"
+                   width = "64px" height = "64px"
+                   title = "large"
+                   onclick = "startNewGame(2)"
+               />
                <br>
                <img name ="pauseGameImg" src ="images/pause1.png" onclick = "pauseResume()"/>
                <br>

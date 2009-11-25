@@ -29,15 +29,28 @@ function timer(){
     document.getElementById("timerLabel").innerHTML = "Time:  " + (mins > 9 ? mins: "0" + mins) + ":" + (secs > 9 ? secs: "0" + secs)+ "";   
     document.getElementById("flagsLabel").innerHTML = "Flags: "+ flaged + "/" + bombsNum;
 }
-function startNewGame(){
+function startNewGame(type){
     run = false;
     time = 0;
     game = false;
     uncovered = 0;
     flaged = 0;
     clearInterval(timerId);
-    drawBoard();
-    
+   
+    if (type == 0){
+        bombsNum = 10;
+        rows = 8;
+        cols = 8;   
+    }else if (type == 1){
+        bombsNum = 40;
+        rows = 16;
+        cols = 16;
+    }else if (type == 2){
+        bombsNum = 100;
+        rows = 16;
+        cols = 30;
+    }
+    drawBoard();    
     //set the pause button
     document.getElementById("timerLabel").innerHTML = "Time:  00:00";
     document.getElementById("flagsLabel").innerHTML = "Flags: 0/" + bombsNum;
