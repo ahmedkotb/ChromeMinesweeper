@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>MineSweeper</title>
+        <link rel=StyleSheet href="cell.css" type="text/css">
+        <script src="minesweeper.js"></script>
+    </head>
+    
+    <body onload= "startNewGame()">
+    <h1> MineSweeper 0.08 Alpha</h1>
+        <h3>pure javaScript mine Sweeper</h3>
+        <a href="changelog"> changelog </a><br>
+        you can send your feedbacks and comments to <br> kotbcorp@gmail.com <br>
+        thank u
+        
+        <div align = "center">
+        <img name = "newGameImg" src ="images/newgame.png" onclick = "startNewGame()"/>
+        <img name ="pauseGameImg" src ="images/pause1.png" onclick = "pauseResume()"/>
+        </div>
+        
+        <div id = "board" align = "center" oncontextmenu="return false" ondragstart="return false"></div>
+        <div id ="timerLabel" align = "center"></div>
+    </body>
+    
+</html>

@@ -1,0 +1,19 @@
+.cell_closed {
+    float:left;
+    background-color:#fbcc67;
+    width:35px;
+    height:35px;
+    text-align:center;
+    margin-left:0px;
+    margin-bottom:0px;
+}
+.cell_opened{
+    float:left;
+    background-color:#eceae9;
+    width:35px;
+    height:35px;
+    text-align:center;
+    margin-left:0px;
+    margin-bottom:0px;
+}
+
