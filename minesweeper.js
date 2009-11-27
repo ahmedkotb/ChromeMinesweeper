@@ -78,7 +78,7 @@ function drawBoard(){
         cellsData[i] = new Array(cols);
         cellsView[i] = new Array(cols);   
         for (j = 0;j< cols;j++){
-            tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='test("+ i + "," + j + ",event)'> </div></td> ";            
+            tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='cell_click("+ i + "," + j + ",event)'> </div></td> ";            
             cellsData[i][j] = 0;
             cellsView[i][j] = 0;
         }
@@ -269,9 +269,9 @@ function pauseResume(){
     }
 }
 
-function test(row,col,e){ 
+function cell_click(row,col,e){ 
     //start a new game
-    if (uncovered == 0){
+    if (uncovered == 0 && game == false){
         run = true;
         timerId = setInterval("timer()",1000);
         game = true;
@@ -287,7 +287,7 @@ function test(row,col,e){
             lostAction();
         }else{
             walk(row,col);                   
-             if (flaged == bombsNum || uncovered == rows*cols - bombsNum )
+            if (flaged == bombsNum || uncovered == rows*cols - bombsNum )
                 winAction();
         }
     }else if (e.which == 1 && cellsView[row][col] == 1){
