@@ -56,7 +56,10 @@ function startNewGame(type){
         rows = 16;
         cols = 30;
     }
-    drawBoard();    
+    drawBoard();
+    //set the board to visible
+    document.getElementById("board").style.display = "block";
+    document.getElementById("pauseScreen").style.display = "none";
     //set the pause button
     document.getElementById("timerLabel").innerHTML = "Time:  00:00";
     document.getElementById("flagsLabel").innerHTML = "Flags: 0/" + bombsNum;
@@ -237,18 +240,29 @@ function winAction(){
 }
 function pauseResume(){
     if (!game) return;
-    //var board = document.getElementById("board");
+    var board = document.getElementById("board");
+    var pauseScreen = document.getElementById("pauseScreen");
     if (!run){
         run = true;
         timerId = setInterval("timer()",1000);
-        //board.style.display = "block";
+        board.style.display = "block";
+        pauseScreen.style.display = "none";
         document.pauseGameImg.src = "images/pause1.png";
         document.pauseGameImg.onmouseover = function () {this.src = "images/pause2.png";};
         document.pauseGameImg.onmouseout = function () {this.src = "images/pause1.png";};
     }else{
         run = false;
         clearInterval(timerId);
-        //board.style.display = "none";
+        
+        pauseScreen.style.width = board.clientWidth;
+        pauseScreen.style.Height = board.clientHeight;
+        pauseScreen.style.backgroundColor = "#c3d9ff";
+        pauseScreen.innerHTML = "  <h3 style ='background-color: #c3d9ff;display:inline'> Game Paused </h3>";
+
+        
+        board.style.display = "none";
+        pauseScreen.style.display = "inline";
+
         document.pauseGameImg.src = "images/play1.png";
         document.pauseGameImg.onmouseover = function () {this.src = "images/play2.png";};
         document.pauseGameImg.onmouseout = function () {this.src = "images/play1.png";};
