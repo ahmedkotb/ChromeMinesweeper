@@ -13,36 +13,48 @@
         thank u
 
         <div align = "center" >
-            <!--<div style = "background-Color:#c3d9ff">-->
             <div>
                 <img src ="images/sface.png" 
                     width = "64px" height = "64px"
                     title = "small"
                     onclick = "startNewGame(0)"
+                    style = "cursor:pointer"
                    />        
-               <!--<img src ="images/small.png" width = "100px" height = "64px"/>-->
-
+               
                <img src ="images/mface.png"
                    width = "64px" height = "64px"
                    title = "medium"
                    onclick = "startNewGame(1)"
+                   style = "cursor:pointer"
                />
                
                <img src ="images/lface.png"
                    width = "64px" height = "64px"
                    title = "large"
                    onclick = "startNewGame(2)"
+                   style = "cursor:pointer"
                />
                <br>
-               <img name ="pauseGameImg" src ="images/pause1.png" onclick = "pauseResume()"/>
+               
+               <img name ="pauseGameImg"
+                   src ="images/pause1.png" 
+                   onclick = "pauseResume()"
+                   title = "pause/resume"
+                   style = "cursor:pointer"
+               />
+               
                <br>
                <div id ="timerLabel"></div>
                <div id ="flagsLabel"></div>
             </div>
     
             <br>
-            <!--<img name = "newGameImg" src ="images/newgame.png" onclick = "startNewGame()"/> -->
-            <div id = "board" oncontextmenu="return false" ondragstart="return false"></div>
+            <div id = "board" 
+                oncontextmenu="return false" 
+                ondragstart="return false">
+            </div>
+            <br>
+            (c) 2009 kotbcorp.
         </div>
         
 
