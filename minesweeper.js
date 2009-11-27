@@ -29,6 +29,12 @@ function timer(){
     document.getElementById("timerLabel").innerHTML = "Time:  " + (mins > 9 ? mins: "0" + mins) + ":" + (secs > 9 ? secs: "0" + secs)+ "";   
     document.getElementById("flagsLabel").innerHTML = "Flags: "+ flaged + "/" + bombsNum;
 }
+//sets the inner text value of a cell using the
+//appropriate image
+function setCellText(cell,value){
+    if (value == 0) return;
+    cell.style.backgroundImage = "url(images/nums/" + value + ".png)";    
+}
 function startNewGame(type){
     run = false;
     time = 0;
@@ -69,8 +75,7 @@ function drawBoard(){
         cellsData[i] = new Array(cols);
         cellsView[i] = new Array(cols);   
         for (j = 0;j< cols;j++){
-            tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='test("+ i + "," + j + ",event)'> </div></td> ";
-            //tbl+= "<td> <INPUT TYPE='button' VALUE='' > </td> ";
+            tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='test("+ i + "," + j + ",event)'> </div></td> ";            
             cellsData[i][j] = 0;
             cellsView[i][j] = 0;
         }
@@ -127,8 +132,9 @@ function walk(row,col){
     uncovered +=1;
     cell = document.getElementById(row + "-" + col);
     cell.className = "cell_opened";
-    if (cellsData[row][col] != 0)
-        cell.innerHTML = cellsData[row][col];
+    //show the cell number
+    setCellText(cell,cellsData[row][col]);
+    
     if (cellsData[row][col] == 0){
 	    walk(row+1,col);
 	    walk(row,col+1);
@@ -150,22 +156,23 @@ function showBombs(){
         for (j=0;j<cols;j++){
             var cell = document.getElementById(i+ "-" + j);
             if (cellsView[i][j] != 2){
-                if (cellsData[i][j] == -1){               
+                if (cellsData[i][j] == -1){
+                    //show a bomb image
                     cell.style.backgroundImage = "url(images/mine.png)";
                 }else{
-                    cell.style.backgroundImage = "";
+                    //show the cell number
                     cell.className = "cell_opened";
-                    if (cellsData[i][j] != 0) cell.innerHTML = cellsData[i][j];        
+                    setCellText(cell,cellsData[i][j]);                    
                 }
             }else{
-                if (cellsData[i][j] != -1){
-                    //found a wrong flag
+                //found a wrong flag
+                if (cellsData[i][j] != -1)                 
                     cell.style.backgroundImage = "url(images/flag2.png)";
-                }    
             }         
         }
     }
 }
+
 //called when user clicked on an visible cell
 //to uncover all the cells near it
 function helper(row,col){
@@ -181,8 +188,6 @@ function helper(row,col){
     if (row < rows-1 && col < cols-1 && cellsView[row+1][col+1] == 2) flags++;
     if (row > 0 && col < cols-1 && cellsView[row-1][col+1] == 2) flags++;
     if (row < rows-1 && col > 0 && cellsView[row+1][col-1] == 2) flags++;
-
-    //alert(flags);
 
     if (flags == cellsData[row][col]){
         if (row > 0 && cellsView[row-1][col] != 2)
