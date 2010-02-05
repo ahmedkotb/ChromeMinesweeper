@@ -1,11 +1,13 @@
 //main parameters
 bombsNum = 40;
 rows = 16;
-cols = 16;   
+cols = 16;
+gameType = 0;   
 //-----------------------------
 //main variables     
 uncovered = 0;
 flaged = 0;
+wrongFlaged = 0;
 time = 0;
 run = false;
 game = true;
@@ -24,10 +26,14 @@ cellsView = new Array(rows);
 //2 is flaged
 function timer(){
     time++;
+    document.getElementById("timerLabel").innerHTML = "Time:  " + formatTime(time);
+    document.getElementById("flagsLabel").innerHTML = "Flags: "+ flaged + "/" + bombsNum;
+}
+
+function formatTime(time){
     var mins = Math.floor(time/60);
     var secs = time%60;
-    document.getElementById("timerLabel").innerHTML = "Time:  " + (mins > 9 ? mins: "0" + mins) + ":" + (secs > 9 ? secs: "0" + secs)+ "";   
-    document.getElementById("flagsLabel").innerHTML = "Flags: "+ flaged + "/" + bombsNum;
+    return (mins > 9 ? mins: "0" + mins) + ":" + (secs > 9 ? secs: "0" + secs);
 }
 //sets the inner text value of a cell using the
 //appropriate image
@@ -41,8 +47,9 @@ function startNewGame(type){
     game = false;
     uncovered = 0;
     flaged = 0;
+    wrongFlaged = 0;
     clearInterval(timerId);
-   
+    gameType = type;
     if (type == 0){
         bombsNum = 10;
         rows = 8;
@@ -52,11 +59,13 @@ function startNewGame(type){
         rows = 16;
         cols = 16;
     }else if (type == 2){
-        bombsNum = 100;
+        bombsNum = 99;
         rows = 16;
         cols = 30;
     }
     drawBoard();
+    //hide the scoreBoard if it was visible
+    document.getElementById("scoreBoard").style.display = "none";
     //set the board to visible
     document.getElementById("board").style.display = "block";
     document.getElementById("pauseScreen").style.display = "none";
@@ -181,7 +190,7 @@ function showBombs(){
 function helper(row,col){
     if (!game) return;
     //counting flags
-    flags = 0;
+    var flags = 0;
     if (row > 0 && cellsView[row-1][col] == 2) flags++;
     if (row < rows-1 && cellsView[row+1][col] == 2) flags++;
     if (col > 0 && cellsView[row][col-1] == 2) flags++;
@@ -217,8 +226,10 @@ function helper(row,col){
         if (row < rows -1 && col > 0 && cellsView[row+1][col-1] != 2)
             if (cellsData[row+1][col-1] == -1)     {lostAction();return;} else walk(row+1,col-1);
     }
-
-    if (flaged == bombsNum || uncovered == rows*cols - bombsNum )
+    
+    
+    
+    if ((flaged == bombsNum || uncovered == rows*cols - bombsNum) && wrongFlaged == 0)
         winAction();   
 }
 
@@ -227,21 +238,79 @@ function lostAction(){
     run = false;
     game = false;
     showBombs();
-    alert("how unlucky you are !!!\nbetter luck next time :D");
+    setTimeout("finishGame(false)", 700);
 }
 
 function winAction(){
     clearInterval(timerId);
     run = false;
     game = false;
-    showBombs();
-    alert("Bravo...you won in " + time + " seconds");
-    clearIm
+    showBombs();   
+    setTimeout("finishGame(true)", 700);
 }
+
+function finishGame(win){
+    var lastAddedScore = "";
+    if (win){
+        alert("Bravo...you won in " + time + " seconds\n you can click one of the faces to start a new game");
+        lastAddedScore = chrome.extension.getBackgroundPage().saveScore(time,gameType);   
+    }else{
+        alert("how unlucky you are !!!\nbetter luck next time :D \n you can click one of the faces to start a new game");
+    }
+    
+    generateScoreBoard(lastAddedScore);
+}
+
+
+//generate the score Board
+function generateScoreBoard(lastAddedScore){
+
+    var scoreBoard = document.getElementById("scoreBoard");
+    var board = document.getElementById("board");
+    
+    var tbl = "<table > <th style = 'background-color:#c3d9ff;'> Small </th>" 
+    tbl +=  "<th style = 'background-color:#c3d9ff;'> Medium </th>"
+    tbl += "<th style = 'background-color:#c3d9ff;'> Large </th> ";
+    
+    for (var i=0;i<10;i++){    
+        tbl += "<tr>";
+        for (var j=0;j<3;j++){    
+            if (localStorage["score" + j + "" + i] == null || localStorage["score" + j + "" + i] == "undefined")
+                tbl += "<td align = 'center'> - </td>";
+            else{
+                if (lastAddedScore == "score" + j + "" + i)
+                    tbl += "<td style = 'background-color:#fbcc67' align = 'center'> " + formatTime(localStorage["score" + j + "" + i]) + " </td>";
+                else
+                    tbl += "<td align = 'center'> " + formatTime(localStorage["score" + j + "" + i]) + " </td>";
+            }
+        }       
+        tbl += "</tr>";
+    }
+    tbl += "</table>";
+    scoreBoard.innerHTML = tbl;
+    scoreBoard.style.display = "block";
+    board.style.display = "none"; 
+}
+
+
+//show the score Board
+//will pause the game
+function showScoreBoard(){
+    if (!game){
+        generateScoreBoard("");
+        return;
+    }
+   if (run)
+        pauseResume();        
+    generateScoreBoard("");
+}
+
 function pauseResume(){
     if (!game) return;
     var board = document.getElementById("board");
     var pauseScreen = document.getElementById("pauseScreen");
+    var scoreBoard = document.getElementById("scoreBoard");
+    
     if (!run){
         run = true;
         timerId = setInterval("timer()",1000);
@@ -250,6 +319,7 @@ function pauseResume(){
         document.pauseGameImg.src = "images/pause1.png";
         document.pauseGameImg.onmouseover = function () {this.src = "images/pause2.png";};
         document.pauseGameImg.onmouseout = function () {this.src = "images/pause1.png";};
+        scoreBoard.style.display = "none";
     }else{
         run = false;
         clearInterval(timerId);
@@ -262,7 +332,7 @@ function pauseResume(){
         
         board.style.display = "none";
         pauseScreen.style.display = "inline";
-
+        
         document.pauseGameImg.src = "images/play1.png";
         document.pauseGameImg.onmouseover = function () {this.src = "images/play2.png";};
         document.pauseGameImg.onmouseout = function () {this.src = "images/play1.png";};
@@ -298,10 +368,12 @@ function cell_click(row,col,e){
             cell.style.backgroundImage = "url(images/flag.png)";
             cellsView[row][col] = 2;
             flaged++;
+            if (cellsData[row][col] != -1) wrongFlaged++;
         }else{
             cell.style.backgroundImage = "";
             cellsView[row][col] = 0;                     
             flaged--;
+            if (cellsData[row][col] != -1) wrongFlaged--;
         }
     }
 }

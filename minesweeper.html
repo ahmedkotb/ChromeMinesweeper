@@ -6,8 +6,7 @@
     </head>
     
     <body onload= "startNewGame(0)">
-    <h1> MineSweeper 0.22 Alpha</h1>
-        <h3>pure javaScript mine Sweeper</h3>
+    <h2 align = "center"> Chrome MineSweeper </h2>
         <div align = "center" >
             <div>
                 <img src ="images/sface.png" 
@@ -39,19 +38,29 @@
                    style = "cursor:pointer"
                />
                
+               <img name ="scoreGameImg"
+                   src ="images/score.png" 
+                   onclick = "showScoreBoard()"
+                   title = "Score Board"
+                   style = "cursor:pointer"
+               />
                <br>
                <div id ="timerLabel"></div>
                <div id ="flagsLabel"></div>
             </div>
     
             <br>
-            <div id = "board" 
-                oncontextmenu="return false" 
-                ondragstart="return false">
+            <div id = "board"
+                oncontextmenu = "return false" 
+                ondragstart = "return false">
             </div>
             <div id = "pauseScreen" 
-                oncontextmenu="return false" 
-                ondragstart="return false">                
+                oncontextmenu = "return false" 
+                ondragstart = "return false">                
+            </div>
+            <div id = "scoreBoard"
+                oncontextmenu = "return false" 
+                ondragstart = "return false">                
             </div>
             <br>
             (c) 2009 kotbcorp.
