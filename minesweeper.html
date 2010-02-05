@@ -6,8 +6,9 @@
     </head>
     
     <body onload= "startNewGame(0)">
-    <h2 align = "center"> Chrome MineSweeper </h2>
+    <!--<h2 align = "center"> Chrome MineSweeper </h2>-->   
         <div align = "center" >
+            <img src = "images/logo.png"/>
             <div>
                 <img src ="images/sface.png" 
                     width = "64px" height = "64px"
@@ -45,8 +46,11 @@
                    style = "cursor:pointer"
                />
                <br>
-               <div id ="timerLabel"></div>
-               <div id ="flagsLabel"></div>
+               <img src="images/timer.png"/>
+               <div id ="timerLabel" style="display:inline"></div>
+               <img src="images/flag.png"/>
+               <div id ="flagsLabel" style="display:inline"></div>
+               <div id ="msg" style = "display:table;border:1px coral solid"></div>
             </div>
     
             <br>
@@ -63,7 +67,7 @@
                 ondragstart = "return false">                
             </div>
             <br>
-            (c) 2009 kotbcorp.
+            (c) 2009-2010 <a href="http://kotbcorp.blogspot.com">kotbcorp.</a>
         </div>
         
 

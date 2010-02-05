@@ -16,6 +16,9 @@ timerId = 0;
 startRow = 0;
 startCol = 0;
 
+//score board Table : holds the html scores' table 
+scoreBoardTable = null;
+
 //contain numbers written in each cell
 //-1 means a bomb
 cellsData = new Array(rows);
@@ -66,6 +69,8 @@ function startNewGame(type){
     drawBoard();
     //hide the scoreBoard if it was visible
     document.getElementById("scoreBoard").style.display = "none";
+    //hide the message div if it was visible
+    hideMessage();
     //set the board to visible
     document.getElementById("board").style.display = "block";
     document.getElementById("pauseScreen").style.display = "none";
@@ -238,7 +243,7 @@ function lostAction(){
     run = false;
     game = false;
     showBombs();
-    setTimeout("finishGame(false)", 700);
+    setTimeout("finishGame(false)", 500);
 }
 
 function winAction(){
@@ -246,30 +251,48 @@ function winAction(){
     run = false;
     game = false;
     showBombs();   
-    setTimeout("finishGame(true)", 700);
+    setTimeout("finishGame(true)", 500);
 }
 
 function finishGame(win){
     var lastAddedScore = "";
+    var msg = "";
     if (win){
-        alert("Bravo...you won in " + time + " seconds\n you can click one of the faces to start a new game");
-        lastAddedScore = chrome.extension.getBackgroundPage().saveScore(time,gameType);   
+        //alert("Bravo...you won in " + time + " seconds\n you can click one of the faces to start a new game");
+        msg  = "<p style ='align:center'> <b>Bravo!</b></p>";
+        lastAddedScore = chrome.extension.getBackgroundPage().saveScore(time,gameType);    
+        showMessage(msg);
+        if (lastAddedScore == "") return;
+        msg += "you have a new score";
+        msg += "<div onclick='showScoreBoard();hideMessage()' \
+                style='background-color:yellow;display:table;cursor:pointer'>\
+                show score board</div>";
     }else{
-        alert("how unlucky you are !!!\nbetter luck next time :D \n you can click one of the faces to start a new game");
+        //alert("how unlucky you are !!!\nbetter luck next time :D \n you can click one of the faces to start a new game");        
+        msg = "how unlucky you are !!!<br>better luck next time :D";
     }
     
+    showMessage(msg);
     generateScoreBoard(lastAddedScore);
 }
 
+function hideMessage(){
+    var msgDiv = document.getElementById("msg");
+    msgDiv.style.display = "none";    
+}
+
+//popup alert replacement
+function showMessage(msg){
+    var msgDiv = document.getElementById("msg");
+    msgDiv.style.display = "table";
+    msgDiv.innerHTML = msg;
+}
 
 //generate the score Board
 function generateScoreBoard(lastAddedScore){
-
-    var scoreBoard = document.getElementById("scoreBoard");
-    var board = document.getElementById("board");
-    
-    var tbl = "<table > <th style = 'background-color:#c3d9ff;'> Small </th>" 
-    tbl +=  "<th style = 'background-color:#c3d9ff;'> Medium </th>"
+ 
+    var tbl = "<table > <th style = 'background-color:#c3d9ff;'> Small </th>";
+    tbl +=  "<th style = 'background-color:#c3d9ff;'> Medium </th>";
     tbl += "<th style = 'background-color:#c3d9ff;'> Large </th> ";
     
     for (var i=0;i<10;i++){    
@@ -287,22 +310,28 @@ function generateScoreBoard(lastAddedScore){
         tbl += "</tr>";
     }
     tbl += "</table>";
-    scoreBoard.innerHTML = tbl;
-    scoreBoard.style.display = "block";
-    board.style.display = "none"; 
+    scoreBoardTable = tbl;
 }
 
 
 //show the score Board
 //will pause the game
 function showScoreBoard(){
-    if (!game){
-        generateScoreBoard("");
+    var scoreBoard = document.getElementById("scoreBoard");
+    var board = document.getElementById("board");
+    
+    if (!game){        
+        scoreBoard.innerHTML = scoreBoardTable;
+        scoreBoard.style.display = "block";
+        board.style.display = "none"; 
         return;
     }
-   if (run)
-        pauseResume();        
-    generateScoreBoard("");
+    if (run)
+        pauseResume();
+
+    scoreBoard.innerHTML = scoreBoardTable;
+    scoreBoard.style.display = "block";
+    board.style.display = "none"; 
 }
 
 function pauseResume(){
