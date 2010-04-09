@@ -81,6 +81,10 @@ function startNewGame(type){
     document.pauseGameImg.src = "images/pause1.png";
     document.pauseGameImg.onmouseover = function () {this.src = "images/pause2.png";};
     document.pauseGameImg.onmouseout = function () {this.src = "images/pause1.png";};
+
+    //generate the score board
+    //in case the user wants to see his previous score before playing any game
+    generateScoreBoard("");
 }
 function drawBoard(){
     var board = document.getElementById("board");
@@ -370,27 +374,35 @@ function pauseResume(){
 
 function cell_click(row,col,e){ 
     //start a new game
-    if (uncovered == 0 && game == false){
-        run = true;
-        timerId = setInterval("timer()",1000);
-        game = true;
-        startRow = row;
-        startCol = col;
-        generate();
-    }else{
-        if (!run) return;
+    if (uncovered == 0){
+        //first click start the game
+        if (game==false){
+            run = true;
+            timerId = setInterval("timer()",1000);
+            game = true;
+        }
+        //first left click generate minefield
+        if (e.which == 1){
+            startRow = row;
+            startCol = col;
+            generate();
+        }
     }
-  
+    if (!run) return;
+
+    //click on covered cell with left mouse button
     if (e.which == 1 && cellsView[row][col] == 0){
         if (cellsData[row][col] == -1){         
             lostAction();
         }else{
             walk(row,col);                   
-            if (flaged == bombsNum || uncovered == rows*cols - bombsNum )
+            if (uncovered == rows*cols - bombsNum)
                 winAction();
         }
+    //click on uncovered cell with left mouse button
     }else if (e.which == 1 && cellsView[row][col] == 1){
         helper(row,col);
+    //click on uncovered cell with right mouse button
     }else if (e.which == 3 && cellsView[row][col] != 1) {
         cell = document.getElementById(row+ "-" +col);
         if (cellsView[row][col] == 0){
