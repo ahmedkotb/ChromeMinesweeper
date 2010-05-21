@@ -27,24 +27,42 @@ cellsData = new Array(rows);
 cellsView = new Array(rows);
 //1 is visible , 0 is not
 //2 is flaged
+
+//current game type
+currentType = 0;
+
 function timer(){
     time++;
     document.getElementById("timerLabel").innerHTML = "Time:  " + formatTime(time);
     document.getElementById("flagsLabel").innerHTML = "Flags: "+ flaged + "/" + bombsNum;
 }
 
+//to pause when tab change
+function tabChanged(tabId , selectionInfo){
+    if (run == true)
+        pauseResume();
+}
+
+//register for the tab change event
+chrome.tabs.onSelectionChanged.addListener(tabChanged);
+
+//helper function to format the time string
 function formatTime(time){
     var mins = Math.floor(time/60);
     var secs = time%60;
     return (mins > 9 ? mins: "0" + mins) + ":" + (secs > 9 ? secs: "0" + secs);
 }
+
 //sets the inner text value of a cell using the
 //appropriate image
 function setCellText(cell,value){
     if (value == 0) return;
     cell.style.backgroundImage = "url(images/nums/" + value + ".png)";    
 }
+
+
 function startNewGame(type){
+    currentType = type;
     run = false;
     time = 0;
     game = false;
@@ -86,6 +104,7 @@ function startNewGame(type){
     //in case the user wants to see his previous score before playing any game
     generateScoreBoard("");
 }
+
 function drawBoard(){
     var board = document.getElementById("board");
     var tbl = "<table cellspacing = '0'>";

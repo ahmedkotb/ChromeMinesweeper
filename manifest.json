@@ -1,6 +1,6 @@
 {
   "name": "Chrome MineSweeper",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "A Classic MineSweeper game with beautiful graphics and score board",
   "background_page": "background.html",  
   "browser_action": {
