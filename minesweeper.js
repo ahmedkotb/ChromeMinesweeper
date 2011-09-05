@@ -1,3 +1,8 @@
+//constants
+BOMB = -1;
+VISIBLE = 1;
+NOT_VISIBLE = 0;
+FLAGED = 2;
 //main parameters
 bombsNum = 40;
 rows = 16;
@@ -19,12 +24,12 @@ startCol = 0;
 //score board Table : holds the html scores' table
 scoreBoardTable = null;
 
-//contain numbers written in each cell
+//Array containing numbers written in each cell
 //-1 means a bomb
-cellsData = new Array(rows);
+cellsData = null;
 
-//contain cell proporties
-cellsView = new Array(rows);
+//Array containing cell proporties
+cellsView = null;
 //1 is visible , 0 is not
 //2 is flaged
 
@@ -35,12 +40,17 @@ function timer(){
     time++;
     document.getElementById("timerLabel").innerHTML = "Time:  " + formatTime(time);
     document.getElementById("flagsLabel").innerHTML = "Flags: "+ flaged + "/" + bombsNum;
+    //save current game
+    var gamestatus = { gameType : gameType , bombsNum : bombsNum , rows : rows , cols : cols , time : time ,
+                       uncovered : uncovered ,flaged : flaged , wrongFlaged : wrongFlaged , cellsData : cellsData ,
+                       cellsView : cellsView, gamedate : new Date()
+    };
+    localStorage["lastgame"] = JSON.stringify(gamestatus);
 }
 
 //to pause when tab change
 function tabChanged(tabId , selectionInfo){
-    if (run == true)
-        pauseResume();
+    setRun(false);
 }
 
 //register for the tab change event
@@ -60,6 +70,40 @@ function setCellText(cell,value){
     cell.style.backgroundImage = "url(images/nums/" + value + ".png)";
 }
 
+function setFlaged(cell){
+    cell.style.backgroundImage = "url(images/flag.png)";
+}
+
+function loadGame(){
+    var gamestatus = JSON.parse(localStorage["lastgame"]);
+    gameType = gamestatus.gameType;
+    bombsNum = gamestatus.bombsNum; rows = gamestatus.rows; cols = gamestatus.cols;
+    time = gamestatus.time;
+    flaged = gamestatus.flaged;
+    wrongFlaged = gamestatus.wrongFlaged;
+    uncovered = gamestatus.uncovered;
+    game = true;
+    cellsData = gamestatus.cellsData;
+    cellsView = gamestatus.cellsView;
+    var lastplayed = new Date(gamestatus.gamedate);
+    var seconds = (new Date().getTime() - lastplayed.getTime())/1000;
+    var msg = "";
+    if (seconds < 60 * 60 * 24 * 30){
+        msg = "Last played : ";
+        if (seconds < 60)
+            msg += Math.floor(seconds) + " seconds";
+        else if (seconds < 60 * 60)
+            msg += Math.floor(seconds/60) + " minutes and " + Math.floor(seconds%60) + " seconds";
+        else if (seconds < 60*60*24)
+            msg += Math.floor(seconds/60/60) + " hours , " + Math.floor(seconds/60%60) + " minutes and" + Math.floor(seconds%60) + " seconds";
+        else if (seconds < 60*60*24*30)
+            msg += Math.floor(seconds/60/60/24) + " days , " + Math.floor(seconds/60/60%24) + " hours , " + Math.floor(seconds/60%60) + " minutes and" + Math.floor(seconds%60) + " seconds";
+        msg += " ago";
+    }else{
+        msg = "Last played on : " + lastplayed.toDateString();
+    }
+    showMessage(msg);
+}
 
 function startNewGame(type){
     currentType = type;
@@ -71,53 +115,84 @@ function startNewGame(type){
     wrongFlaged = 0;
     clearInterval(timerId);
     gameType = type;
-    if (type == 0){
-        bombsNum = 10;
-        rows = 8;
-        cols = 8;
-    }else if (type == 1){
-        bombsNum = 40;
-        rows = 16;
-        cols = 16;
-    }else if (type == 2){
-        bombsNum = 99;
-        rows = 16;
-        cols = 30;
-    }
-    drawBoard();
     //hide the scoreBoard if it was visible
     document.getElementById("scoreBoard").style.display = "none";
     //hide the message div if it was visible
     hideMessage();
+    if (type == -1 && localStorage["lastgame"] != undefined && localStorage["lastgame"] != ""){
+        //try to load previously saved game
+        loadGame();
+        drawOldBoard();
+    }else{
+        if (type == 0){
+            bombsNum = 10; rows = 8; cols = 8;
+        }else if (type == 1){
+            bombsNum = 40; rows = 16; cols = 16;
+        }else if (type == 2){
+            bombsNum = 99; rows = 16; cols = 30;
+        }else{
+            //default
+            bombsNum = 10; rows = 8; cols = 8;
+            //in case type was equal to -1 (first run) but no game was stored
+            gameType = 0;
+        }
+        drawNewBoard();
+        localStorage["lastgame"] = "";
+    }
     //set the board to visible
     document.getElementById("board").style.display = "block";
     document.getElementById("pauseScreen").style.display = "none";
-    //set the pause button
-    document.getElementById("timerLabel").innerHTML = "Time:  00:00";
-    document.getElementById("flagsLabel").innerHTML = "Flags: 0/" + bombsNum;
-
+    //default pause button
     document.getElementById("pauseGameImg").src = "images/pause1.png";
-		document.getElementById("pauseGameImg").onmouseover = function () {this.src = "images/pause2.png";};
+    document.getElementById("pauseGameImg").onmouseover = function () {this.src = "images/pause2.png";};
     document.getElementById("pauseGameImg").onmouseout = function () {this.src = "images/pause1.png";};
 
+    document.getElementById("timerLabel").innerHTML = "Time:  " + formatTime(time);
+    document.getElementById("flagsLabel").innerHTML = "Flags: "  + flaged +  "/" + bombsNum;
+
+    setRun(run);
     //generate the score board
-    //in case the user wants to see his previous score before playing any game
+    //in case the user wants to see his previous scores before playing any game
     generateScoreBoard("");
 }
 
-function drawBoard(){
+function drawOldBoard(){
     var board = document.getElementById("board");
     var tbl = "<table cellspacing = '0'>";
-    var i=0;
-    var j=0;
-    for (i = 0;i < rows;i++){
+    for (var i = 0;i < rows;i++){
+        tbl+="<tr>";
+        for (var j = 0;j< cols;j++){
+            if (cellsView[i][j] == VISIBLE)
+                tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_opened' onmouseup ='cell_click("+ i + "," + j + ",event)'> </div></td> ";
+            else
+                tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='cell_click("+ i + "," + j + ",event)'> </div></td> ";
+        }
+        tbl+= "</tr>";
+    }
+    board.innerHTML = tbl + "</table>";
+    //set images
+    for (var i=0;i< rows;++i)
+        for (var j=0;j< cols;++j){
+            if (cellsData[i][j] != BOMB && cellsView[i][j] == VISIBLE)
+                setCellText(document.getElementById(i + "-" + j),cellsData[i][j]);
+            if (cellsView[i][j] == FLAGED)
+                setFlaged(document.getElementById(i + "-" + j));
+        }
+}
+
+function drawNewBoard(){
+    var board = document.getElementById("board");
+    var tbl = "<table cellspacing = '0'>";
+    cellsData = new Array(rows);
+    cellsView = new Array(rows);
+    for (var i = 0;i < rows;i++){
         tbl+="<tr>";
         cellsData[i] = new Array(cols);
         cellsView[i] = new Array(cols);
-        for (j = 0;j< cols;j++){
+        for (var j = 0;j< cols;j++){
             tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='cell_click("+ i + "," + j + ",event)'> </div></td> ";
             cellsData[i][j] = 0;
-            cellsView[i][j] = 0;
+            cellsView[i][j] = NOT_VISIBLE;
         }
         tbl+= "</tr>";
     }
@@ -130,7 +205,7 @@ function generate(){
         var col=Math.floor(Math.random()*cols);
         var row=Math.floor(Math.random()*rows);
         //if new location is already a bomb
-        if (cellsData[row][col] == -1) continue;
+        if (cellsData[row][col] == BOMB) continue;
         //if new location is near the start region
 
         if (col == startCol-1 || col == startCol || col == startCol +1){
@@ -139,25 +214,25 @@ function generate(){
         }
 
         i++;
-        cellsData[row][col] = -1;
+        cellsData[row][col] = BOMB;
 
 
-        if (row+1 < rows && cellsData[row+1][col] != -1)
+        if (row+1 < rows && cellsData[row+1][col] != BOMB)
             cellsData[row+1][col] += 1;
-        if (row > 0 && cellsData[row-1][col] != -1)
+        if (row > 0 && cellsData[row-1][col] != BOMB)
             cellsData[row-1][col] += 1;
-        if (col+1 < cols && cellsData[row][col+1] != -1)
+        if (col+1 < cols && cellsData[row][col+1] != BOMB)
             cellsData[row][col+1] += 1;
-        if (col > 0 && cellsData[row][col-1] != -1)
+        if (col > 0 && cellsData[row][col-1] != BOMB)
             cellsData[row][col-1] += 1;
         //diagonals
-        if (row +1 < rows && col+1 < cols && cellsData[row+1][col+1] != -1)
+        if (row +1 < rows && col+1 < cols && cellsData[row+1][col+1] != BOMB)
             cellsData[row+1][col+1] += 1;
-        if (row > 0 && col > 0 && cellsData[row-1][col-1] != -1)
+        if (row > 0 && col > 0 && cellsData[row-1][col-1] != BOMB)
             cellsData[row-1][col-1] += 1;
-        if (row +1 < rows && col > 0 && cellsData[row+1][col-1] != -1)
+        if (row +1 < rows && col > 0 && cellsData[row+1][col-1] != BOMB)
             cellsData[row+1][col-1] += 1;
-        if (row > 0 && col+1 < cols && cellsData[row-1][col+1] != -1)
+        if (row > 0 && col+1 < cols && cellsData[row-1][col+1] != BOMB)
             cellsData[row-1][col+1] += 1;
 
     }
@@ -195,8 +270,8 @@ function showBombs(){
     for (i=0;i<rows;i++){
         for (j=0;j<cols;j++){
             var cell = document.getElementById(i+ "-" + j);
-            if (cellsView[i][j] != 2){
-                if (cellsData[i][j] == -1){
+            if (cellsView[i][j] != FLAGED){
+                if (cellsData[i][j] == BOMB){
                     //show a bomb image
                     cell.style.backgroundImage = "url(images/mine.png)";
                 }else{
@@ -206,7 +281,7 @@ function showBombs(){
                 }
             }else{
                 //found a wrong flag
-                if (cellsData[i][j] != -1)
+                if (cellsData[i][j] != BOMB)
                     cell.style.backgroundImage = "url(images/flag2.png)";
             }
         }
@@ -219,40 +294,40 @@ function helper(row,col){
     if (!game) return;
     //counting flags
     var flags = 0;
-    if (row > 0 && cellsView[row-1][col] == 2) flags++;
-    if (row < rows-1 && cellsView[row+1][col] == 2) flags++;
-    if (col > 0 && cellsView[row][col-1] == 2) flags++;
-    if (col < cols-1 && cellsView[row][col+1] == 2) flags++;
+    if (row > 0 && cellsView[row-1][col] == FLAGED) flags++;
+    if (row < rows-1 && cellsView[row+1][col] == FLAGED) flags++;
+    if (col > 0 && cellsView[row][col-1] == FLAGED) flags++;
+    if (col < cols-1 && cellsView[row][col+1] == FLAGED) flags++;
 
-    if (row > 0 && col > 0 && cellsView[row-1][col-1] == 2) flags++;
-    if (row < rows-1 && col < cols-1 && cellsView[row+1][col+1] == 2) flags++;
-    if (row > 0 && col < cols-1 && cellsView[row-1][col+1] == 2) flags++;
-    if (row < rows-1 && col > 0 && cellsView[row+1][col-1] == 2) flags++;
+    if (row > 0 && col > 0 && cellsView[row-1][col-1] == FLAGED) flags++;
+    if (row < rows-1 && col < cols-1 && cellsView[row+1][col+1] == FLAGED) flags++;
+    if (row > 0 && col < cols-1 && cellsView[row-1][col+1] == FLAGED) flags++;
+    if (row < rows-1 && col > 0 && cellsView[row+1][col-1] == FLAGED) flags++;
 
     if (flags == cellsData[row][col]){
-        if (row > 0 && cellsView[row-1][col] != 2)
-            if (cellsData[row-1][col] == -1) {lostAction();return;} else walk(row-1,col);
+        if (row > 0 && cellsView[row-1][col] != FLAGED)
+            if (cellsData[row-1][col] == BOMB) {lostAction();return;} else walk(row-1,col);
 
-        if (row < rows-1 && cellsView[row+1][col] != 2)
-            if (cellsData[row+1][col] == -1)    {lostAction();return;} else walk(row+1,col);
+        if (row < rows-1 && cellsView[row+1][col] != FLAGED)
+            if (cellsData[row+1][col] == BOMB)    {lostAction();return;} else walk(row+1,col);
 
-        if (col > 0 && cellsView[row][col-1] != 2)
-            if (cellsData[row][col-1] == -1)     {lostAction();return;} else walk(row,col-1);
+        if (col > 0 && cellsView[row][col-1] != FLAGED)
+            if (cellsData[row][col-1] == BOMB)     {lostAction();return;} else walk(row,col-1);
 
-        if (col < cols-1 && cellsView[row][col+1] != 2)
-            if (cellsData[row][col+1] == -1)     {lostAction();return;} else walk(row,col+1);
+        if (col < cols-1 && cellsView[row][col+1] != FLAGED)
+            if (cellsData[row][col+1] == BOMB)     {lostAction();return;} else walk(row,col+1);
 
-        if (row > 0 && col > 0 && cellsView[row-1][col-1] != 2)
-            if (cellsData[row-1][col-1] == -1)     {lostAction();return;} else walk(row-1,col-1);
+        if (row > 0 && col > 0 && cellsView[row-1][col-1] != FLAGED)
+            if (cellsData[row-1][col-1] == BOMB)     {lostAction();return;} else walk(row-1,col-1);
 
-        if (row < rows-1 && col < cols-1 && cellsView[row+1][col+1] != 2)
-            if (cellsData[row+1][col+1] == -1)    {lostAction();return;} else walk(row+1,col+1);
+        if (row < rows-1 && col < cols-1 && cellsView[row+1][col+1] != FLAGED)
+            if (cellsData[row+1][col+1] == BOMB)    {lostAction();return;} else walk(row+1,col+1);
 
-        if (row > 0 && col < cols-1 && cellsView[row-1][col+1] != 2)
-            if (cellsData[row-1][col+1] == -1)     {lostAction();return;} else walk(row-1,col+1);
+        if (row > 0 && col < cols-1 && cellsView[row-1][col+1] != FLAGED)
+            if (cellsData[row-1][col+1] == BOMB)     {lostAction();return;} else walk(row-1,col+1);
 
-        if (row < rows -1 && col > 0 && cellsView[row+1][col-1] != 2)
-            if (cellsData[row+1][col-1] == -1)     {lostAction();return;} else walk(row+1,col-1);
+        if (row < rows -1 && col > 0 && cellsView[row+1][col-1] != FLAGED)
+            if (cellsData[row+1][col-1] == BOMB)     {lostAction();return;} else walk(row+1,col-1);
     }
 
 
@@ -300,6 +375,8 @@ function finishGame(win){
 
     showMessage(msg);
     generateScoreBoard(lastAddedScore);
+    //game finished so no need to save it
+    localStorage["lastgame"] = "";
 }
 
 function hideMessage(){
@@ -353,21 +430,21 @@ function showScoreBoard(){
         return;
     }
     if (run)
-        pauseResume();
+        setRun(false);
 
     scoreBoard.innerHTML = scoreBoardTable;
     scoreBoard.style.display = "block";
     board.style.display = "none";
 }
 
-function pauseResume(){
+function setRun(value){
     if (!game) return;
     var board = document.getElementById("board");
     var pauseScreen = document.getElementById("pauseScreen");
     var scoreBoard = document.getElementById("scoreBoard");
 
-    if (!run){
-        run = true;
+    run = value;
+    if (value){
         timerId = setInterval("timer()",1000);
         board.style.display = "block";
         pauseScreen.style.display = "none";
@@ -375,15 +452,15 @@ function pauseResume(){
         document.getElementById("pauseGameImg").onmouseover = function () {this.src = "images/pause2.png";};
         document.getElementById("pauseGameImg").onmouseout = function () {this.src = "images/pause1.png";};
         scoreBoard.style.display = "none";
+        hideMessage();
     }else{
-        run = false;
         clearInterval(timerId);
 
         pauseScreen.style.width = board.clientWidth;
         pauseScreen.style.Height = board.clientHeight;
         pauseScreen.style.backgroundColor = "#c3d9ff";
-        pauseScreen.innerHTML = "  <h3 style ='background-color: #c3d9ff;display:inline'> Game Paused </h3>";
 
+        pauseScreen.innerHTML = "<h3 style ='background-color: #c3d9ff;display:inline'> Game Paused </h3>";
 
         board.style.display = "none";
         pauseScreen.style.display = "inline";
@@ -414,7 +491,7 @@ function cell_click(row,col,e){
 
     //click on covered cell with left mouse button
     if (e.which == 1 && cellsView[row][col] == 0){
-        if (cellsData[row][col] == -1){
+        if (cellsData[row][col] == BOMB){
             lostAction();
         }else{
             walk(row,col);
@@ -427,16 +504,16 @@ function cell_click(row,col,e){
     //click on uncovered cell with right mouse button
     }else if (e.which == 3 && cellsView[row][col] != 1) {
         cell = document.getElementById(row+ "-" +col);
-        if (cellsView[row][col] == 0){
-            cell.style.backgroundImage = "url(images/flag.png)";
+        if (cellsView[row][col] == NOT_VISIBLE){
+            setFlaged(cell);
             cellsView[row][col] = 2;
             flaged++;
-            if (cellsData[row][col] != -1) wrongFlaged++;
+            if (cellsData[row][col] != BOMB) wrongFlaged++;
         }else{
             cell.style.backgroundImage = "";
             cellsView[row][col] = 0;
             flaged--;
-            if (cellsData[row][col] != -1) wrongFlaged--;
+            if (cellsData[row][col] != BOMB) wrongFlaged--;
         }
     }
 }

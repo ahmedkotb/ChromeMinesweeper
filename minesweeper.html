@@ -5,7 +5,7 @@
         <script src="minesweeper.js"></script>
     </head>
 
-    <body onload= "startNewGame(0)">
+    <body onload= "startNewGame(-1)">
     <!--<h2 align = "center"> Chrome MineSweeper </h2>-->
         <div align = "center" >
             <img src = "images/logo.png"/>
@@ -34,7 +34,7 @@
 
                <img id ="pauseGameImg"
                    src ="images/pause1.png"
-                   onclick = "pauseResume()"
+                   onclick = "setRun(!run)"
                    title = "pause/resume"
                    style = "cursor:pointer"
                />
@@ -67,7 +67,7 @@
                 ondragstart = "return false">
             </div>
             <br>
-            (c) 2009-2010 <a href="http://kotbcorp.blogspot.com">kotbcorp.</a>
+            (c) 2009-2011 <a href="http://kotbcorp.blogspot.com">kotbcorp.</a>
         </div>
 
 
