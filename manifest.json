@@ -1,15 +1,11 @@
 {
-  "name": "Chrome MineSweeper",
-  "version": "0.6.0",
+  "name": "KMineSweeper",
+  "version": "0.6.1",
   "description": "A Classic MineSweeper game with beautiful graphics and score board",
   "background_page": "background.html",
   "browser_action": {
     "default_icon": "images/mine.png"
   },
-
-  "permissions": [
-    "tabs"
-  ],
 
   "icons": { "16": "images/icon16.png",
            "32": "images/icon32.png",
