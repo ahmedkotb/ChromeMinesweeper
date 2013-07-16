@@ -3,45 +3,45 @@
         <title>MineSweeper</title>
         <link rel=StyleSheet href="cell.css" type="text/css">
         <script src="minesweeper.js"></script>
+        <script src="init.js"></script>
     </head>
 
-    <body onload= "startNewGame(-1)">
+    <body>
     <!--<h2 align = "center"> Chrome MineSweeper </h2>-->
         <div align = "center" >
             <img src = "images/logo.png"/>
             <div>
                 <img src ="images/sface.png"
+                    id = "newEasyGameButton"
                     width = "64px" height = "64px"
                     title = "small"
-                    onclick = "startNewGame(0)"
                     style = "cursor:pointer"
                    />
 
                <img src ="images/mface.png"
+                   id = "newMedGameButton"
                    width = "64px" height = "64px"
                    title = "medium"
-                   onclick = "startNewGame(1)"
                    style = "cursor:pointer"
                />
 
                <img src ="images/lface.png"
+                   id = "newLargeGameButton"
                    width = "64px" height = "64px"
                    title = "large"
-                   onclick = "startNewGame(2)"
                    style = "cursor:pointer"
                />
                <br>
 
                <img id ="pauseGameImg"
                    src ="images/pause1.png"
-                   onclick = "setRun(!run)"
                    title = "pause/resume"
                    style = "cursor:pointer"
                />
 
                <img name ="scoreGameImg"
+                    id ="scoreGameImg"
                    src ="images/score.png"
-                   onclick = "showScoreBoard()"
                    title = "Score Board"
                    style = "cursor:pointer"
                />
@@ -54,18 +54,9 @@
             </div>
 
             <br>
-            <div id = "board"
-                oncontextmenu = "return false"
-                ondragstart = "return false">
-            </div>
-            <div id = "pauseScreen"
-                oncontextmenu = "return false"
-                ondragstart = "return false">
-            </div>
-            <div id = "scoreBoard"
-                oncontextmenu = "return false"
-                ondragstart = "return false">
-            </div>
+            <div id = "board"> </div>
+            <div id = "pauseScreen"> </div>
+            <div id = "scoreBoard"> </div>
             <br>
             (c) 2009-2011 <a href="http://kotbcorp.blogspot.com">kotbcorp.</a>
         </div>

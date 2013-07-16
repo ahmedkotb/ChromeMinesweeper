@@ -156,6 +156,7 @@ function startNewGame(type){
     generateScoreBoard("");
 }
 
+
 function drawOldBoard(){
     var board = document.getElementById("board");
     var tbl = "<table cellspacing = '0'>";
@@ -163,20 +164,28 @@ function drawOldBoard(){
         tbl+="<tr>";
         for (var j = 0;j< cols;j++){
             if (cellsView[i][j] == VISIBLE)
-                tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_opened' onmouseup ='cell_click("+ i + "," + j + ",event)'> </div></td> ";
+                tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_opened' > </div></td> ";
             else
-                tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='cell_click("+ i + "," + j + ",event)'> </div></td> ";
+                tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' > </div></td> ";
         }
         tbl+= "</tr>";
     }
+
     board.innerHTML = tbl + "</table>";
-    //set images
+    clickfun = function(i, j){
+        return function() {
+            cell_click(i, j, event);
+        }
+    };
+    //set images and events
     for (var i=0;i< rows;++i)
         for (var j=0;j< cols;++j){
             if (cellsData[i][j] != BOMB && cellsView[i][j] == VISIBLE)
                 setCellText(document.getElementById(i + "-" + j),cellsData[i][j]);
             if (cellsView[i][j] == FLAGED)
                 setFlaged(document.getElementById(i + "-" + j));
+            document.getElementById(i + "-" + j).addEventListener('click', clickfun(i ,j));
+            document.getElementById(i + "-" + j).addEventListener('contextmenu', clickfun(i ,j));
         }
 }
 
@@ -190,13 +199,26 @@ function drawNewBoard(){
         cellsData[i] = new Array(cols);
         cellsView[i] = new Array(cols);
         for (var j = 0;j< cols;j++){
-            tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' onmouseup ='cell_click("+ i + "," + j + ",event)'> </div></td> ";
+            tbl += " <td><div id = '" + i +"-" + j + "' class= 'cell_closed' > </div></td> ";
             cellsData[i][j] = 0;
             cellsView[i][j] = NOT_VISIBLE;
         }
         tbl+= "</tr>";
     }
     board.innerHTML = tbl + "</table>";
+
+    clickfun = function(i, j){
+        return function() {
+            cell_click(i, j, event);
+        }
+    };
+
+    for (var i = 0;i < rows;i++){
+        for (var j = 0;j< cols;j++){
+            document.getElementById(i + "-" + j).addEventListener('click', clickfun(i, j));
+            document.getElementById(i + "-" + j).addEventListener('contextmenu', clickfun(i ,j));
+        }
+    }
 }
 
 function generate(){
@@ -341,7 +363,7 @@ function lostAction(){
     run = false;
     game = false;
     showBombs();
-    setTimeout("finishGame(false)", 500);
+    setTimeout(function() {finishGame(false)}, 500);
 }
 
 function winAction(){
@@ -349,31 +371,49 @@ function winAction(){
     run = false;
     game = false;
     showBombs();
-    setTimeout("finishGame(true)", 500);
+    setTimeout(function() {finishGame(true)}, 500);
 }
 
 function finishGame(win){
     var lastAddedScore = "";
     var msg = "";
+    var action = undefined;
+
     if (win){
         msg  = "<p style ='align:center'> <b>Bravo!</b></p>";
         lastAddedScore = chrome.extension.getBackgroundPage().saveScore(time,gameType);
         showMessage(msg);
         if (lastAddedScore == "") return;
         msg += "you made a new score !";
-        msg += "<div onclick='showScoreBoard();hideMessage()' \
+
+        action = function() {
+            showScoreBoard();
+            hideMessage();
+        };
+
+        msg += "<div id='innermsg' \
                 style='background-color:#FFF380;display:table;cursor:pointer ;\
                 border-radius: 10px;padding:3px'>show score board</div>";
-				msg += "OR";
+        msg += "OR";
+
     }else{
         msg = "how unlucky you are !!!<br>better luck next time :D";
     }
 
-		msg += "<div onclick='startNewGame(" + currentType + ");hideMessage()' \
-		    		style='background-color:#FFF380;display:table;cursor:pointer;	 \
-	    			border-radius: 10px;padding:3px'>play again</div>";
+    startNewGameAction = function () {
+        startNewGame(currentType);
+        hideMessage();
+    };
+
+    msg += "<div id='outermsg'  \
+            style='background-color:#FFF380;display:table;cursor:pointer;	 \
+            border-radius: 10px;padding:3px'>play again</div>";
 
     showMessage(msg);
+    if (action)
+        document.getElementById('innermsg').addEventListener('click', action);
+    document.getElementById('outermsg').addEventListener('click', startNewGameAction);
+
     generateScoreBoard(lastAddedScore);
     //game finished so no need to save it
     localStorage["lastgame"] = "";
@@ -445,7 +485,7 @@ function setRun(value){
 
     run = value;
     if (value){
-        timerId = setInterval("timer()",1000);
+        timerId = setInterval(timer ,1000);
         board.style.display = "block";
         pauseScreen.style.display = "none";
         document.getElementById("pauseGameImg").src = "images/pause1.png";
@@ -477,7 +517,7 @@ function cell_click(row,col,e){
         //first click start the game
         if (game==false){
             run = true;
-            timerId = setInterval("timer()",1000);
+            timerId = setInterval(timer,1000);
             game = true;
         }
         //first left click generate minefield
