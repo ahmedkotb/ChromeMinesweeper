@@ -384,7 +384,7 @@ function finishGame(win){
         lastAddedScore = chrome.extension.getBackgroundPage().saveScore(time,gameType);
         showMessage(msg);
         if (lastAddedScore == "") return;
-        msg += "you made a new score !";
+        msg += "You made a new score !";
 
         action = function() {
             showScoreBoard();
@@ -397,7 +397,7 @@ function finishGame(win){
         msg += "OR";
 
     }else{
-        msg = "how unlucky you are !!!<br>better luck next time :D";
+        msg = "Sorry <br/> Better luck next time";
     }
 
     startNewGameAction = function () {
