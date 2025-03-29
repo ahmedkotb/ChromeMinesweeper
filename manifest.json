@@ -1,6 +1,6 @@
 {
   "name": "KMineSweeper",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "manifest_version": 3,
   "description": "A Classic MineSweeper game with beautiful graphics and score board",
   "background": {
